@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Resizable Table</title>
+    <style>
+      table {
+        border-collapse: collapse;
+        table-layout: fixed;
+        width: 100%; /* Adjust width as needed */
+      }
+      th,
+      td {
+        padding: 10px;
+        border: 1px solid #ddd;
+        overflow: hidden;
+        white-space: nowrap; /* Prevent text wrapping */
+        text-overflow: ellipsis; /* Show ellipsis (...) for long content */
+      }
+      th {
+        cursor: col-resize; /* Set cursor to resize icon */
+        position: relative; /* Needed for proper resizer positioning */
+      }
+      .resizer {
+        width: 5px;
+        height: 100%;
+        position: absolute;
+        right: 0;
+        top: 0;
+        cursor: col-resize; /* Set cursor to resize icon for resizer element */
+        z-index: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <table id="resizableTable">
+      <thead>
+        <tr>
+          <th>Column 1</th>
+          <th>Column 2</th>
+          <th>Column 3</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Row 1, Column 1</td>
+          <td>Row 1, Column 2</td>
+          <td>Row 1, Column 3</td>
+        </tr>
+        <tr>
+          <td>Row 2, Column 1</td>
+          <td>Row 2, Column 2</td>
+          <td>Row 2, Column 3</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <script>
+      const resizableTable = document.getElementById("resizableTable");
+      const tableHeaders = resizableTable.querySelectorAll("th");
+
+      tableHeaders.forEach((th) => {
+        const resizer = document.createElement("div");
+        resizer.classList.add("resizer");
+        th.appendChild(resizer);
+      });
+
+      const resizers = resizableTable.querySelectorAll("th .resizer");
+
+      function onMouseDown(event) {
+        const resizer = event.target;
+        const tableHeader = resizer.parentElement;
+        const tableBody = tableHeader.parentElement.nextElementSibling;
+        const table = tableHeader.parentElement.parentElement;
+        const tableWidth = table.offsetWidth;
+        const startX = event.clientX;
+        const startWidth = tableHeader.offsetWidth;
+
+        document.addEventListener("mousemove", onMouseMove);
+        document.addEventListener("mouseup", onMouseUp);
+
+        function onMouseMove(event) {
+          const newWidth = startWidth + (event.clientX - startX);
+          if (newWidth > 0 && newWidth < tableWidth) {
+            tableHeader.style.width = `${newWidth}px`;
+
+            // Update corresponding td elements in all rows of tbody
+            const columnIndex = tableHeader.cellIndex;
+            tableBody.querySelectorAll("tr td")[columnIndex].forEach((td) => {
+              td.style.width = `${newWidth}px`;
+            });
+          }
+        }
+
+        function onMouseUp() {
+          document.removeEventListener("mousemove", onMouseMove);
+          document.removeEventListener("mouseup", onMouseUp);
+        }
+      }
+
+      resizers.forEach((resizer) =>
+        resizer.addEventListener("mousedown", onMouseDown)
+      );
+    </script>
+  </body>
+</html>
